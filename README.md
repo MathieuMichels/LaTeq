@@ -59,7 +59,7 @@ LaTeq "x^2 + y^2 = z^2" --png
 LaTeq "\int_0^1 x^2 dx" --jpeg --output ~/Documents
 ```
 
-By default, files are saved in `/tmp/latex_equations`.
+By default, files are saved in `/tmp/LaTeq`.
 
 ## 📤 Output
 
