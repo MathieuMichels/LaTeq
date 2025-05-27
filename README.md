@@ -17,12 +17,33 @@ Install on Debian-based systems:
 sudo apt install texlive imagemagick
 ````
 
-## 🚀 Installation
+## 🧪 Testing
+
+To quickly test the script without installing it system-wide:
+
+```bash
+chmod +x LaTeq.sh
+./LaTeq.sh "x^2 + \frac{1}{2}" --png
+```
+
+Make sure the output is opened and appears as expected.
+
+## 🌍 System-wide Installation
+
+To use `LaTeq` from anywhere on your system:
 
 ```bash
 sudo cp LaTeq.sh /usr/local/bin/LaTeq
 sudo chmod +x /usr/local/bin/LaTeq
 ```
+
+You can now run:
+
+```bash
+LaTeq "e^{i\pi} + 1 = 0" --jpeg
+```
+
+from any directory.
 
 ## 🛠 Usage
 
