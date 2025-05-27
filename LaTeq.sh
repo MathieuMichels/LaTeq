@@ -11,14 +11,14 @@ if [ $# -eq 0 ]; then
     echo "Example: $0 \"3x+1\""
     echo "Example: $0 \"3x+1\" --png"
     echo "Example: $0 \"3x+1\" --jpeg --output ~/Documents"
-    echo "By default, files are saved in /tmp/latex_equations/"
+    echo "By default, files are saved in /tmp/LaTeq/"
     exit 1
 fi
 
 EQUATION="$1"
 EXPORT_PNG=false
 EXPORT_JPEG=false
-OUTPUT_DIR="/tmp/latex_equations"
+OUTPUT_DIR="/tmp/LaTeq"
 
 # Parse arguments
 shift
