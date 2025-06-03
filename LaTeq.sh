@@ -92,7 +92,7 @@ fi
 cat >> "$TEX_FILE" << EOF
 
 \begin{document}
-\$\displaystyle $EQUATION\$
+\$\$ $EQUATION\$\$
 \end{document}
 EOF
 
