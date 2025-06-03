@@ -119,7 +119,6 @@ This makes it easy to debug complex equations or package conflicts.
 ## ⚠️ Notes
 * You must use escaped LaTeX in the command-line string (e.g., `\\frac` instead of `\frac`) or write the equation between quotes (e.g., `LaTeq "\frac{3x+1}{2}"` or `LaTeq \\frac{3x+1}{2}`)
 * If `convert` is missing, install ImageMagick as shown above
-* Some packages (like `mtpro2`) are commercial and may not be available in standard LaTeX distributions
 * For complex equations with custom commands, you can define them inline:
   ```bash
   LaTeq "\newcommand{\mysum}{\displaystyle\sum} \mysum_{i=1}^n x_i"
