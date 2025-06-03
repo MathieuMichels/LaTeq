@@ -38,32 +38,34 @@ FORCE_REMOVE=false
 KEEP_DEPENDENCIES=true
 SHOW_HELP=false
 
-# Parse command line arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --force)
-            FORCE_REMOVE=true
-            shift
-            ;;
-        --keep-dependencies|--keep-deps)
-            KEEP_DEPENDENCIES=true
-            shift
-            ;;
-        --remove-dependencies|--remove-deps)
-            KEEP_DEPENDENCIES=false
-            shift
-            ;;
-        --help|-h)
-            SHOW_HELP=true
-            shift
-            ;;
-        *)
-            echo "Unknown option: $1"
-            echo "Use --help for usage information"
-            exit 1
-            ;;
-    esac
-done
+# Parse command line arguments function
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --force)
+                FORCE_REMOVE=true
+                shift
+                ;;
+            --keep-dependencies|--keep-deps)
+                KEEP_DEPENDENCIES=true
+                shift
+                ;;
+            --remove-dependencies|--remove-deps)
+                KEEP_DEPENDENCIES=false
+                shift
+                ;;
+            --help|-h)
+                SHOW_HELP=true
+                shift
+                ;;
+            *)
+                echo "Unknown option: $1"
+                echo "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+}
 
 # Show help message
 show_help() {
