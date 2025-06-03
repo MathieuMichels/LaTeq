@@ -1,6 +1,24 @@
 # LaTeq
 **Compile standalone LaTeX equations into PDF, PNG, or JPEG with a simple command.**
 
+## 📋 Table of Contents
+- [What is LaTeq?](#-what-is-lateq)
+- [Features](#-features)
+- [Installation](#-installation)
+  - [Automatic Installation](#automatic-installation-recommended)
+  - [Manual Installation](#manual-installation)
+  - [Dependencies](#-dependencies)
+- [Usage](#-usage)
+  - [Basic Examples](#basic-examples)
+  - [Advanced Examples](#advanced-examples-with-packages)
+- [Package Support](#-package-support)
+- [Output Formats](#-output-formats)
+- [Error Handling](#-error-handling)
+- [Examples Gallery](#-examples-gallery)
+- [Troubleshooting](#-troubleshooting)
+- [Notes](#-notes)
+- [Uninstallation](#-uninstallation)
+
 ## 🧮 What is LaTeq?
 LaTeq is a command-line tool that lets you compile LaTeX math equations on the fly. It's perfect for generating beautiful equations for slides, documents, or image-based content. It supports PDF, PNG, and JPEG outputs and opens the result directly.
 
@@ -15,7 +33,7 @@ LaTeq is a command-line tool that lets you compile LaTeX math equations on the f
 - **Flexible output locations**: Save files wherever you want
 - **Temporary file separation**: Working files stay in system temp directory, only final output goes to your specified directory
 
-## 🚀 Quick Installation
+## 🚀 Installation
 
 ### Automatic Installation (Recommended)
 
@@ -49,9 +67,61 @@ This script will:
 - ✅ Set PowerShell execution policy if needed
 - ✅ Test the installation
 
-After installation, you can use `LaTeq "equation"` directly in PowerShell!
+After installation, you can use `LaTeq "equation"` directly from any terminal!
 
-## 🗑️ Uninstallation
+### Manual Installation
+
+#### 🐧 Linux / macOS
+If you prefer manual installation or want more control:
+
+```bash
+# Download the script
+wget https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/LaTeq.sh
+
+# Make it executable
+chmod +x LaTeq.sh
+
+# Install system-wide
+sudo cp LaTeq.sh /usr/local/bin/LaTeq
+```
+
+#### 🪟 Windows
+For manual Windows installation (run as Administrator):
+
+```powershell
+# Download the script
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/LaTeq.ps1" -OutFile "LaTeq.ps1"
+
+# Create installation directory
+New-Item -ItemType Directory -Path "C:\Program Files\LaTeq" -Force
+
+# Copy file
+Copy-Item "LaTeq.ps1" "C:\Program Files\LaTeq\"
+
+# Add to PATH
+$path = [Environment]::GetEnvironmentVariable("Path", "Machine")
+[Environment]::SetEnvironmentVariable("Path", "$path;C:\Program Files\LaTeq", "Machine")
+```
+
+### 🧪 Testing the Installation
+
+**After automatic installation:**
+```bash
+LaTeq "x^2 + \frac{1}{2}" --jpeg
+```
+
+**For manual testing before system-wide installation:**
+```bash
+# Linux/macOS
+./LaTeq.sh "x^2 + \frac{1}{2}" --jpeg
+
+# Windows
+.\LaTeq.ps1 "x^2 + \frac{1}{2}" --jpeg
+```
+
+![Testing Example](galery/testing_example.jpg)
+
+Make sure the output is opened and appears as expected.
 
 ### Automatic Uninstallation (Windows)
 To completely remove LaTeq from your Windows system (but keep dependencies like MiKTeX and ImageMagick):
@@ -77,46 +147,10 @@ powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.co
 powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -Force
 ```
 
-**Note:** Dependencies (MiKTeX, TeX Live, ImageMagick, Ghostscript) are not removed. Uninstall them separately if desired.
-
-### Manual Installation
-
-#### 🐧 Linux / macOS
-If you prefer manual installation or want more control:
-
-```bash
-# Download the script
-wget https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/LaTeq.sh
-
-# Make it executable
-chmod +x LaTeq.sh
-
-# Install system-wide
-sudo cp LaTeq.sh /usr/local/bin/LaTeq
-```
-
-#### 🪟 Windows
-For manual Windows installation:
-
-```powershell
-# Download the script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/LaTeq.ps1" -OutFile "LaTeq.ps1"
-
-# Create installation directory (as Administrator)
-New-Item -ItemType Directory -Path "C:\Program Files\LaTeq" -Force
-
-# Copy file (as Administrator)
-Copy-Item "LaTeq.ps1" "C:\Program Files\LaTeq\"
-
-# Add to PATH (as Administrator)
-$path = [Environment]::GetEnvironmentVariable("Path", "Machine")
-[Environment]::SetEnvironmentVariable("Path", "$path;C:\Program Files\LaTeq", "Machine")
-```
-
-## 🔧 Dependencies
+### 🔧 Dependencies
 The automatic installer handles these for you, but if installing manually:
 
-### 🐧 Linux / macOS
+#### 🐧 Linux / macOS
 - `texlive` (for compiling LaTeX)
 - `imagemagick` (for converting PDFs to images)
 
@@ -130,7 +164,7 @@ For full LaTeX functionality with all packages:
 sudo apt install texlive-full
 ```
 
-### 🪟 Windows
+#### 🪟 Windows
 - **MiKTeX** or **TeX Live** (for compiling LaTeX)
 - **ImageMagick** (for converting PDFs to images)
 - **PowerShell** (included with Windows)
@@ -145,62 +179,9 @@ Or use **Chocolatey** package manager:
 choco install miktex imagemagick
 ```
 
-## 🧪 Testing
-If you used the automatic installer, LaTeq is already installed system-wide.
-
-### 🐧 Linux / macOS
-To test manually or after manual installation:
-```bash
-chmod +x LaTeq.sh
-./LaTeq.sh "x^2 + \frac{1}{2}" --jpeg
-```
-
-### 🪟 Windows
-To test manually or after manual installation:
-```powershell
-.\LaTeq.ps1 "x^2 + \frac{1}{2}" --jpeg
-```
-
-**After system-wide installation (both Linux and Windows):**
-```bash
-LaTeq "x^2 + \frac{1}{2}" --jpeg
-```
-
-![Testing Example](galery/testing_example.jpg)
-
-Make sure the output is opened and appears as expected.
-
-## 🌍 System-wide Installation
-If you used the automatic installer, this step is already completed!
-
-### 🐧 Linux / macOS
-For manual system-wide installation:
-To use `LaTeq` from anywhere on your system:
-```bash
-sudo cp LaTeq.sh /usr/local/bin/LaTeq
-sudo chmod +x /usr/local/bin/LaTeq
-```
-
-### 🪟 Windows
-For manual system-wide installation (run as Administrator):
-```powershell
-# Copy script to system directory
-Copy-Item "LaTeq.ps1" "C:\Program Files\LaTeq\"
-
-# Add to system PATH
-$path = [Environment]::GetEnvironmentVariable("Path", "Machine")
-[Environment]::SetEnvironmentVariable("Path", "$path;C:\Program Files\LaTeq", "Machine")
-```
-
-You can now run from any directory on both Linux and Windows:
-```bash
-LaTeq "e^{i\pi} + 1 = 0" --jpeg
-```
-![Euler's Identity](galery/euler_identity.jpg)
-
 ## 🛠 Usage
 
-After installation, LaTeq works identically on all platforms:
+LaTeq works identically on all platforms after installation:
 
 ```bash
 LaTeq "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"] [--dpi "value"]
@@ -214,6 +195,8 @@ LaTeq "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--package
 - `--filename "name"` - Custom filename (without extension)
 - `--packages "pkg1,pkg2,pkg3"` - Additional LaTeX packages to include
 - `--dpi "value"` - Resolution for image export (default: 450)
+
+By default, files are saved in the current directory.
 
 ### Basic Examples
 
@@ -273,8 +256,6 @@ LaTeq "\boxed{\underbrace{\rho\bigl(\tfrac{\partial\mathbf{u}}{\partial t}+(\mat
 ```
 ![Navier-Stokes Equation](galery/navier_stokes.jpg)
 
-By default, files are saved in the current directory.
-
 ## 📦 Package Support
 LaTeq includes these packages by default:
 - `amsmath` - Advanced math environments
@@ -295,7 +276,7 @@ Popular packages you might want to use:
 - `xcolor` - Colors
 - `mathtools` - Extended math tools
 
-## 📤 Output
+## 📤 Output Formats
 * **PDF** (default) - Vector format, perfect for documents
 * **PNG** (`--png`) - Raster format with transparency
 * **JPEG** (`--jpeg`) - Raster format, smaller file size
@@ -382,3 +363,31 @@ Force vector diagram:
 LaTeq "\tikz[scale=0.8] \draw[->] (0,0) -- (2,1) node[right] {\$F\$};" --packages "tikz"
 ```
 ![Force Vector](galery/force_vector.jpg)
+
+## 🗑️ Uninstallation
+
+### Automatic Uninstallation (Windows)
+To completely remove LaTeq from your Windows system (but keep dependencies like MiKTeX and ImageMagick):
+
+```powershell
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}"
+```
+
+This script will:
+- ✅ Remove LaTeq installation directory (`C:\Program Files\LaTeq`)
+- ✅ Remove any legacy LaTeq.bat files from previous installations
+- ✅ Remove LaTeq paths from system PATH
+- ✅ Remove LaTeq function from PowerShell profile (optional with `--KeepProfile`)
+- ✅ Clean up temporary files
+- ✅ Keep your LaTeX dependencies (MiKTeX, ImageMagick, etc.)
+
+For manual cleanup or to keep the PowerShell profile function:
+```powershell
+# Keep the PowerShell profile function
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -KeepProfile
+
+# Force uninstall without confirmation
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -Force
+```
+
+**Note:** Dependencies (MiKTeX, TeX Live, ImageMagick, Ghostscript) are not removed. Uninstall them separately if desired.
