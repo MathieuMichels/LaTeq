@@ -342,9 +342,56 @@ LaTeq "\tikz[scale=0.8] \draw[->] (0,0) -- (2,1) node[right] {\$F\$};" --package
 
 ## 🗑️ Uninstallation
 
-### Automatic Uninstallation (Windows)
+### 🐧 Linux / macOS
+To completely remove LaTeq from your Linux or macOS system (but keep dependencies like TeX Live and ImageMagick):
+
+**Automatic uninstallation (recommended):**
+```bash
+curl -sSL https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.sh | bash
+```
+
+This script will:
+- ✅ Find and remove all LaTeq installations (system-wide and user-local)
+- ✅ Clean up temporary files and cache directories
+- ✅ Verify complete removal
+- ✅ Keep your LaTeX dependencies (TeX Live, ImageMagick, etc.)
+
+**Available options:**
+```bash
+# Silent uninstall without prompts
+bash <(curl -sSL https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.sh) --force
+
+# Remove LaTeq AND all dependencies (TeX Live, ImageMagick)
+bash <(curl -sSL https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.sh) --remove-dependencies
+
+# Show help with all options
+bash <(curl -sSL https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.sh) --help
+```
+
+**Manual uninstallation:**
+If you prefer manual removal:
+
+```bash
+# Simple removal
+sudo rm -f /usr/local/bin/LaTeq
+
+# Complete cleanup (removes LaTeq and temporary files)
+sudo rm -f /usr/local/bin/LaTeq /usr/bin/LaTeq
+rm -rf /tmp/lateq-* /tmp/LaTeq
+
+# Verify removal
+if ! command -v LaTeq >/dev/null 2>&1; then
+    echo "LaTeq successfully uninstalled!"
+else
+    echo "Warning: LaTeq command still found in PATH"
+    which LaTeq  # Shows remaining location
+fi
+```
+
+### 🪟 Windows
 To completely remove LaTeq from your Windows system (but keep dependencies like MiKTeX and ImageMagick):
 
+**Automatic uninstallation (recommended):**
 ```powershell
 powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}"
 ```
@@ -357,7 +404,7 @@ This script will:
 - ✅ Clean up temporary files
 - ✅ Keep your LaTeX dependencies (MiKTeX, ImageMagick, etc.)
 
-For manual cleanup or to keep the PowerShell profile function:
+**Available options:**
 ```powershell
 # Keep the PowerShell profile function
 powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -KeepProfile
@@ -366,4 +413,5 @@ powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.co
 powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -Force
 ```
 
-**Note:** Dependencies (MiKTeX, TeX Live, ImageMagick, Ghostscript) are not removed. Uninstall them separately if desired.
+**Manual uninstallation:**
+If you need to uninstall manually, the dependencies can be removed with your system's package manager. Use the commands above or consult your distribution's documentation.
