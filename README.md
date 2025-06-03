@@ -6,10 +6,12 @@ LaTeq is a command-line tool written in Bash that lets you compile LaTeX math eq
 
 ## ✨ Features
 - **Multiple output formats**: PDF (default), PNG, and JPEG
+- **Custom filename support**: Specify your own filename with `--filename`
 - **Custom package support**: Add any LaTeX packages you need
 - **Interactive error handling**: Detailed debugging options when compilation fails
 - **Automatic file opening**: Generated files open in your default viewer
 - **Flexible output locations**: Save files wherever you want
+- **Temporary file separation**: Working files stay in `/tmp/LaTeq`, only final output goes to your specified directory
 
 ## 🔧 Dependencies
 - `texlive` (for compiling LaTeX)
@@ -29,8 +31,10 @@ sudo apt install texlive-full
 To quickly test the script without installing it system-wide:
 ```bash
 chmod +x LaTeq.sh
-./LaTeq.sh "x^2 + \frac{1}{2}" --png
+./LaTeq.sh "x^2 + \frac{1}{2}" --jpeg
 ```
+![Testing Example](galery/testing_example.jpg)
+
 Make sure the output is opened and appears as expected.
 
 ## 🌍 System-wide Installation
@@ -43,42 +47,74 @@ You can now run:
 ```bash
 LaTeq "e^{i\pi} + 1 = 0" --jpeg
 ```
+![Euler's Identity](galery/euler_identity.jpg)
+
 from any directory.
 
 ## 🛠 Usage
 ```bash
-LaTeq "equation" [--png|--jpeg] [--output /path/to/dir] [--packages "pkg1,pkg2,pkg3"]
+LaTeq "equation" [--png|--jpeg] [--output /path/to/dir] [--filename name] [--packages "pkg1,pkg2,pkg3"]
 ```
 
 ### Basic Examples
+
+Simple linear equation:
 ```bash
 LaTeq "3x+1"
-LaTeq "x^2 + y^2 = z^2" --png
+```
+![Basic equation](galery/example_basic.jpg)
+
+Pythagorean theorem:
+```bash
+LaTeq "x^2 + y^2 = z^2" --jpeg
+```
+![Pythagorean theorem](galery/pythagorean.jpg)
+
+Integral calculation:
+```bash
 LaTeq "\int_0^1 x^2 dx" --jpeg --output ~/Documents
 ```
+![Integral](galery/integral.jpg)
 
 ### Advanced Examples with Packages
+
+TikZ graphics:
 ```bash
-# TikZ graphics
-LaTeq "\tikz \draw (0,0) circle (1cm);" --packages "tikz"
+LaTeq "\tikz \draw (0,0) circle (1cm);" --packages "tikz" --jpeg --filename "circle"
+```
+![TikZ Circle](galery/tikz_circle.jpg)
 
-# Chemistry formulas
-LaTeq "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor"
+Chemistry formulas:
+```bash
+LaTeq "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor" --jpeg --filename "methane"
+```
+![Methane molecule](galery/methane.jpg)
 
-# Complex diagrams with multiple packages
-LaTeq '\begin{tikzpicture} \node[draw,fill=blue!20] {Hello}; \end{tikzpicture}' --packages "tikz,xcolor" --png --output ~/Desktop
+Complex diagrams with multiple packages:
+```bash
+LaTeq '\begin{tikzpicture} \node[draw,fill=blue!20] {Hello}; \end{tikzpicture}' --packages "tikz,xcolor" --jpeg --output ~/Desktop --filename "hello_box"
+```
+![Complex TikZ Diagram](galery/hello_box.jpg)
 
-# Physics equations
-LaTeq "\hbar \omega = E" --packages "physics,siunitx"
+Physics equations:
+```bash
+LaTeq "\hbar \omega = E" --packages "physics"
+```
+![Physics Equation](galery/hbar_omega.jpg)
 
-# Custom fonts
-LaTeq "E = mc^2" --packages "newtxtext,newtxmath" --png
+Custom fonts:
+```bash
+LaTeq "E = mc^2" --packages "newtxtext,newtxmath" --jpeg --filename "einstein_custom"
+```
+![Einstein with Custom Fonts](galery/einstein_custom_font.jpg)
 
-# More complex
+More complex:
+```bash
 LaTeq "\boxed{\underbrace{\rho\bigl(\tfrac{\partial\mathbf{u}}{\partial t}+(\mathbf{u}\cdot\nabla)\mathbf{u}\bigr)}_{\color{red}\text{Inertia}}\;=\; -\underbrace{\nabla p}_{\color{blue}\text{Pressure}}\;+\;\underbrace{\mu\,\nabla^2\mathbf{u}}_{\color{green}\text{Viscous}}\;+\;\underbrace{\mathbf{f}}_{\color{orange}\text{Body Force}}}" --packages "amsmath,mathtools,xcolor"
 ```
+![Navier-Stokes Equation](galery/navier_stokes.jpg)
 
-By default, files are saved in `/tmp/LaTeq`.
+By default, files are saved in the current directory.
 
 ## 📦 Package Support
 LaTeq includes these packages by default:
@@ -126,6 +162,7 @@ This makes it easy to debug complex equations or package conflicts.
   ```bash
   LaTeq "\newcommand{\mysum}{\displaystyle\sum} \mysum_{i=1}^n x_i"
   ```
+  ![Custom Command Example](galery/custom_command.jpg)
 
 ## 🔍 Troubleshooting
 - **Package not found**: Install `texlive-full` or the specific package collection
@@ -136,24 +173,51 @@ This makes it easy to debug complex equations or package conflicts.
 ## 📝 Examples Gallery
 
 ### Mathematics
+
+Basel problem:
 ```bash
 LaTeq "\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}"
+```
+![Basel Problem](galery/basel_problem.jpg)
+
+Stokes theorem:
+```bash
 LaTeq "\oint_C \mathbf{F} \cdot d\mathbf{r} = \iint_S (\nabla \times \mathbf{F}) \cdot d\mathbf{S}"
 ```
+![Stokes Theorem](galery/stokes_theorem.jpg)
 
-### Physics  
+### Physics
+
+Einstein's mass-energy equivalence:
 ```bash
 LaTeq "E = mc^2" --packages "physics"
+```
+![Einstein's Formula](galery/einstein.jpg)
+
+Schrödinger equation:
+```bash
 LaTeq "\hat{H}\psi = E\psi" --packages "physics"
 ```
+![Schrödinger Equation](galery/schrodinger.jpg)
 
 ### Chemistry
+
+Acid-base reaction:
 ```bash
 LaTeq "\ce{H2SO4 + 2NaOH -> Na2SO4 + 2H2O}" --packages "mhchem"
+```
+![Chemical Reaction](galery/chemical_reaction.jpg)
+
+Phenol structure:
+```bash
 LaTeq "\chemfig{*6(=-=(-OH)-=-=-)}" --packages "chemfig"
 ```
+![Phenol Structure](galery/benzene_phenol.jpg)
 
 ### Graphics
+
+Force vector diagram:
 ```bash
 LaTeq "\tikz[scale=0.8] \draw[->] (0,0) -- (2,1) node[right] {\$F\$};" --packages "tikz"
 ```
+![Force Vector](galery/force_vector.jpg)
