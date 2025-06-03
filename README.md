@@ -2,7 +2,9 @@
 **Compile standalone LaTeX equations into PDF, PNG, or JPEG with a simple command.**
 
 ## 🧮 What is LaTeq?
-LaTeq is a command-line tool written in Bash that lets you compile LaTeX math equations on the fly. It's perfect for generating beautiful equations for slides, documents, or image-based content. It supports PDF, PNG, and JPEG outputs and opens the result directly.
+LaTeq is a command-line tool that lets you compile LaTeX math equations on the fly. It's perfect for generating beautiful equations for slides, documents, or image-based content. It supports PDF, PNG, and JPEG outputs and opens the result directly.
+
+**Cross-platform:** Works identically on Linux, macOS, and Windows after installation.
 
 ## ✨ Features
 - **Multiple output formats**: PDF (default), PNG, and JPEG
@@ -11,7 +13,7 @@ LaTeq is a command-line tool written in Bash that lets you compile LaTeX math eq
 - **Interactive error handling**: Detailed debugging options when compilation fails
 - **Automatic file opening**: Generated files open in your default viewer
 - **Flexible output locations**: Save files wherever you want
-- **Temporary file separation**: Working files stay in `/tmp/LaTeq`, only final output goes to your specified directory
+- **Temporary file separation**: Working files stay in system temp directory, only final output goes to your specified directory
 
 ## 🚀 Quick Installation
 
@@ -159,9 +161,9 @@ To test manually or after manual installation:
 .\LaTeq.ps1 "x^2 + \frac{1}{2}" --jpeg
 ```
 
-Or if you used the automatic installer:
-```powershell
-LaTeq "x^2 + \frac{1}{2}" -jpeg    # After restarting PowerShell
+**After system-wide installation (both Linux and Windows):**
+```bash
+LaTeq "x^2 + \frac{1}{2}" --jpeg
 ```
 
 ![Testing Example](galery/testing_example.jpg)
@@ -190,26 +192,28 @@ $path = [Environment]::GetEnvironmentVariable("Path", "Machine")
 [Environment]::SetEnvironmentVariable("Path", "$path;C:\Program Files\LaTeq", "Machine")
 ```
 
-You can now run from any directory:
+You can now run from any directory on both Linux and Windows:
 ```bash
-LaTeq "e^{i\pi} + 1 = 0" --jpeg    # Linux/macOS
-```
-```powershell
-powershell LaTeq.ps1 "e^{i\pi} + 1 = 0" --jpeg     # Windows
+LaTeq "e^{i\pi} + 1 = 0" --jpeg
 ```
 ![Euler's Identity](galery/euler_identity.jpg)
 
 ## 🛠 Usage
 
-### 🐧 Linux / macOS
+After installation, LaTeq works identically on all platforms:
+
 ```bash
-LaTeq "equation" [--png|--jpeg] [--output /path/to/dir] [--filename name] [--packages "pkg1,pkg2,pkg3"]
+LaTeq "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"] [--dpi "value"]
 ```
 
-### 🪟 Windows
-```powershell
-powershell LaTeq.ps1 "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"]
-```
+**Parameters:**
+- `equation` - Your LaTeX equation (required)
+- `--png` - Export as PNG image
+- `--jpeg` - Export as JPEG image  
+- `--output "path"` - Directory to save the file
+- `--filename "name"` - Custom filename (without extension)
+- `--packages "pkg1,pkg2,pkg3"` - Additional LaTeX packages to include
+- `--dpi "value"` - Resolution for image export (default: 450)
 
 ### Basic Examples
 
@@ -318,6 +322,8 @@ This makes it easy to debug complex equations or package conflicts.
   LaTeq "\newcommand{\mysum}{\displaystyle\sum} \mysum_{i=1}^n x_i"
   ```
   ![Custom Command Example](galery/custom_command.jpg)
+
+**Note:** All usage examples in this README work identically on Linux, macOS, and Windows after system-wide installation.
 
 ## 🔍 Troubleshooting
 - **Package not found**: Install `texlive-full` or the specific package collection
