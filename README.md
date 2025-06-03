@@ -13,7 +13,41 @@ LaTeq is a command-line tool written in Bash that lets you compile LaTeX math eq
 - **Flexible output locations**: Save files wherever you want
 - **Temporary file separation**: Working files stay in `/tmp/LaTeq`, only final output goes to your specified directory
 
+## 🚀 Quick Installation
+
+### Automatic Installation (Recommended)
+Install LaTeq system-wide with a single command:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/install.sh | bash
+```
+
+This script will:
+- ✅ Check and install all dependencies (texlive, imagemagick)
+- ✅ Download the latest LaTeq script from GitHub
+- ✅ Install it system-wide to `/usr/local/bin/LaTeq`
+- ✅ Test the installation
+- ✅ Work on Debian/Ubuntu, RedHat/CentOS, and Arch Linux
+
+After installation, you can use `LaTeq` from anywhere!
+
+### Manual Installation
+If you prefer manual installation or want more control:
+
+```bash
+# Download the script
+wget https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/LaTeq.sh
+
+# Make it executable
+chmod +x LaTeq.sh
+
+# Install system-wide
+sudo cp LaTeq.sh /usr/local/bin/LaTeq
+```
+
 ## 🔧 Dependencies
+The automatic installer handles these for you, but if installing manually:
+
 - `texlive` (for compiling LaTeX)
 - `imagemagick` (for converting PDFs to images)
 
@@ -28,7 +62,9 @@ sudo apt install texlive-full
 ```
 
 ## 🧪 Testing
-To quickly test the script without installing it system-wide:
+If you used the automatic installer, LaTeq is already installed system-wide. 
+
+To test manually or after manual installation:
 ```bash
 chmod +x LaTeq.sh
 ./LaTeq.sh "x^2 + \frac{1}{2}" --jpeg
@@ -38,6 +74,9 @@ chmod +x LaTeq.sh
 Make sure the output is opened and appears as expected.
 
 ## 🌍 System-wide Installation
+If you used the automatic installer, this step is already completed!
+
+For manual system-wide installation:
 To use `LaTeq` from anywhere on your system:
 ```bash
 sudo cp LaTeq.sh /usr/local/bin/LaTeq
