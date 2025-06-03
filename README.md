@@ -40,13 +40,14 @@ powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.co
 
 This script will:
 - ✅ Check for dependencies (recommends MiKTeX/TeX Live and ImageMagick)
-- ✅ Download the latest LaTeq scripts from GitHub (PowerShell + Batch wrapper)
-- ✅ Install them system-wide to `C:\Program Files\LaTeq`
-- ✅ Add to system PATH so you can use `LaTeq` from anywhere
+- ✅ Download the latest LaTeq script from GitHub (PowerShell)
+- ✅ Install it system-wide to `C:\Program Files\LaTeq`
+- ✅ Add to system PATH for easy access
+- ✅ Create a PowerShell function for simplified usage
 - ✅ Set PowerShell execution policy if needed
 - ✅ Test the installation
 
-After installation, you can use `LaTeq` from anywhere in Command Prompt or PowerShell!
+After installation, you can use `LaTeq "equation"` directly in PowerShell!
 
 ### Manual Installation
 
@@ -68,16 +69,14 @@ sudo cp LaTeq.sh /usr/local/bin/LaTeq
 For manual Windows installation:
 
 ```powershell
-# Download the scripts
+# Download the script
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/LaTeq.ps1" -OutFile "LaTeq.ps1"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/LaTeq.bat" -OutFile "LaTeq.bat"
 
 # Create installation directory (as Administrator)
 New-Item -ItemType Directory -Path "C:\Program Files\LaTeq" -Force
 
-# Copy files (as Administrator)
+# Copy file (as Administrator)
 Copy-Item "LaTeq.ps1" "C:\Program Files\LaTeq\"
-Copy-Item "LaTeq.bat" "C:\Program Files\LaTeq\"
 
 # Add to PATH (as Administrator)
 $path = [Environment]::GetEnvironmentVariable("Path", "Machine")
@@ -129,11 +128,12 @@ chmod +x LaTeq.sh
 ### 🪟 Windows
 To test manually or after manual installation:
 ```powershell
-.\LaTeq.ps1 "x^2 + \frac{1}{2}" -jpeg
+.\LaTeq.ps1 "x^2 + \frac{1}{2}" --jpeg
 ```
-or
-```cmd
-LaTeq.bat "x^2 + \frac{1}{2}" -jpeg
+
+Or if you used the automatic installer:
+```powershell
+LaTeq "x^2 + \frac{1}{2}" -jpeg    # After restarting PowerShell
 ```
 
 ![Testing Example](galery/testing_example.jpg)
@@ -154,9 +154,8 @@ sudo chmod +x /usr/local/bin/LaTeq
 ### 🪟 Windows
 For manual system-wide installation (run as Administrator):
 ```powershell
-# Copy scripts to system directory
+# Copy script to system directory
 Copy-Item "LaTeq.ps1" "C:\Program Files\LaTeq\"
-Copy-Item "LaTeq.bat" "C:\Program Files\LaTeq\"
 
 # Add to system PATH
 $path = [Environment]::GetEnvironmentVariable("Path", "Machine")
@@ -167,8 +166,8 @@ You can now run from any directory:
 ```bash
 LaTeq "e^{i\pi} + 1 = 0" --jpeg    # Linux/macOS
 ```
-```cmd
-LaTeq "e^{i\pi} + 1 = 0" -jpeg     # Windows
+```powershell
+powershell LaTeq.ps1 "e^{i\pi} + 1 = 0" --jpeg     # Windows
 ```
 ![Euler's Identity](galery/euler_identity.jpg)
 
@@ -180,8 +179,8 @@ LaTeq "equation" [--png|--jpeg] [--output /path/to/dir] [--filename name] [--pac
 ```
 
 ### 🪟 Windows
-```cmd
-LaTeq "equation" [-png|-jpeg] [-output "path"] [-filename "name"] [-packages "pkg1,pkg2,pkg3"]
+```powershell
+powershell LaTeq.ps1 "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"]
 ```
 
 ### Basic Examples

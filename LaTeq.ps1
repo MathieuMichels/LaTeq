@@ -1,24 +1,80 @@
 # LaTeq for Windows PowerShell
 # Script to compile a LaTeX equation to standalone PDF, PNG, or JPEG
-# Usage: LaTeq.ps1 "equation" [-png] [-jpeg] [-output "path"] [-filename "name"] [-packages "pkg1,pkg2,pkg3"]
+# Usage: LaTeq.ps1 "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"]
 # Example: .\LaTeq.ps1 "3x+1"
-# Example: .\LaTeq.ps1 "3x+1" -png
-# Example: .\LaTeq.ps1 "3x+1" -jpeg -output "$env:USERPROFILE\Documents"
-# Example: .\LaTeq.ps1 "3x+1" -png -output "$env:USERPROFILE\Documents" -filename "my_equation"
-# Example: .\LaTeq.ps1 "\tikz \draw (0,0) circle (1cm);" -packages "tikz"
-# Example: .\LaTeq.ps1 "\chemfig{H-C(-[2]H)(-[6]H)-H}" -packages "chemfig,xcolor"
+# Example: .\LaTeq.ps1 "3x+1" --png
+# Example: .\LaTeq.ps1 "3x+1" --jpeg --output "$env:USERPROFILE\Documents"
+# Example: .\LaTeq.ps1 "3x+1" --png --output "$env:USERPROFILE\Documents" --filename "my_equation"
+# Example: .\LaTeq.ps1 "\tikz \draw (0,0) circle (1cm);" --packages "tikz"
+# Example: .\LaTeq.ps1 "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor"
 
-param(
-    [Parameter(Mandatory=$true, Position=0)]
-    [string]$Equation,
-    
-    [switch]$png,
-    [switch]$jpeg,
-    
-    [string]$output = $env:TEMP + "\LaTeq",
-    [string]$filename = "",
-    [string]$packages = ""
-)
+# Manual argument parsing to support --parameter syntax like bash version
+if ($args.Count -eq 0) {
+    Write-Host "Usage: LaTeq.ps1 `"equation`" [--png|--jpeg] [--output `"path`"] [--filename `"name`"] [--packages `"pkg1,pkg2,pkg3`"]"
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`""
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png"
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --jpeg --output `"`$env:USERPROFILE\Documents`""
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png --output `"`$env:USERPROFILE\Documents`" --filename `"my_equation`""
+    Write-Host "Example: .\LaTeq.ps1 `"\tikz \draw (0,0) circle (1cm);`" --packages `"tikz`""
+    Write-Host "Example: .\LaTeq.ps1 `"\chemfig{H-C(-[2]H)(-[6]H)-H}`" --packages `"chemfig,xcolor`""
+    Write-Host "By default, files are saved in the current directory"
+    Write-Host "Default packages: amsmath, amssymb, amsfonts"
+    exit 1
+}
+
+# Initialize variables
+$Equation = $args[0]
+$EXPORT_PNG = $false
+$EXPORT_JPEG = $false
+$output = "$env:TEMP\LaTeq"  # Default to temp/LaTeq directory
+$filename = ""
+$packages = ""
+
+# Parse arguments manually
+$i = 1
+while ($i -lt $args.Count) {
+    switch ($args[$i]) {
+        "--png" {
+            $EXPORT_PNG = $true
+            $i++
+        }
+        "--jpeg" {
+            $EXPORT_JPEG = $true
+            $i++
+        }
+        "--output" {
+            if ($i + 1 -lt $args.Count) {
+                $output = $args[$i + 1]
+                $i += 2
+            } else {
+                Write-Host "Error: --output requires a path argument"
+                exit 1
+            }
+        }
+        "--filename" {
+            if ($i + 1 -lt $args.Count) {
+                $filename = $args[$i + 1]
+                $i += 2
+            } else {
+                Write-Host "Error: --filename requires a name argument"
+                exit 1
+            }
+        }
+        "--packages" {
+            if ($i + 1 -lt $args.Count) {
+                $packages = $args[$i + 1]
+                $i += 2
+            } else {
+                Write-Host "Error: --packages requires a package list argument"
+                exit 1
+            }
+        }
+        default {
+            Write-Host "Unknown option: $($args[$i])"
+            exit 1
+        }
+    }
+}
 
 # Show usage if no equation provided
 if (-not $Equation) {
@@ -34,11 +90,11 @@ if (-not $Equation) {
     exit 1
 }
 
-# Setup variables
-$EXPORT_PNG = $png
-$EXPORT_JPEG = $jpeg
+# Setup directories - temporary files ALWAYS go to temp directory (like Linux /tmp/LaTeq)
 $TEMP_DIR = "$env:TEMP\LaTeq"
-$FINAL_OUTPUT_DIR = if ($output -eq "$env:TEMP\LaTeq") { Get-Location } else { $output }
+
+# Final output directory - if not specified, use current directory (like Linux script)
+$FINAL_OUTPUT_DIR = if ($output -eq ".") { Get-Location } else { $output }
 
 # Create directories
 if (-not (Test-Path $TEMP_DIR)) {
@@ -110,7 +166,6 @@ $latexContent += @"
 
 # Write LaTeX file
 $latexContent | Out-File -FilePath $TEX_FILE -Encoding UTF8
-Write-Host "LaTeX file created: $TEX_FILE"
 Write-Host "Compiling equation: $Equation"
 if ($FINAL_OUTPUT_DIR_ABS -ne (Get-Location).Path) {
     Write-Host "Final output directory: $FINAL_OUTPUT_DIR_ABS"
@@ -121,31 +176,60 @@ if ($packages -ne "") {
 
 # Change to temp directory and compile
 Push-Location $TEMP_DIR
-$pdflatexResult = & pdflatex -interaction=nonstopmode "$FILENAME.tex" 2>&1
+try {
+    $pdflatexResult = & pdflatex -interaction=nonstopmode "$FILENAME.tex" 2>&1
+    if ($LASTEXITCODE -ne 0 -and $pdflatexResult) {
+        Write-Host "PDFLaTeX output:"
+        $pdflatexResult | Write-Host
+    }
+} catch {
+    Write-Host "Error running pdflatex: $($_.Exception.Message)"
+}
 Pop-Location
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Compilation successful!"
-    
-    # Clean up auxiliary files
+      # Clean up auxiliary files
     $auxFile = Join-Path $TEMP_DIR "$FILENAME.aux"
     $logFile = Join-Path $TEMP_DIR "$FILENAME.log"
     if (Test-Path $auxFile) { Remove-Item $auxFile -Force }
     if (Test-Path $logFile) { Remove-Item $logFile -Force }
     if (Test-Path $TEX_FILE) { Remove-Item $TEX_FILE -Force }
-    
-    if ($EXPORT_PNG -or $EXPORT_JPEG) {
+      if ($EXPORT_PNG -or $EXPORT_JPEG) {
         # Check if ImageMagick is available
-        $convertCmd = Get-Command "magick" -ErrorAction SilentlyContinue
-        if (-not $convertCmd) {
-            $convertCmd = Get-Command "convert" -ErrorAction SilentlyContinue
-        }
+        $magickCmd = Get-Command "magick" -ErrorAction SilentlyContinue
+        $convertCmd = Get-Command "convert" -ErrorAction SilentlyContinue
         
-        if ($convertCmd) {
-            if ($EXPORT_PNG) {
+        if ($magickCmd -or $convertCmd) {
+            # Check if Ghostscript is available (required for PDF conversion)
+            $gsCmd = Get-Command "gswin64c" -ErrorAction SilentlyContinue
+            if (-not $gsCmd) {
+                $gsCmd = Get-Command "gswin32c" -ErrorAction SilentlyContinue
+            }
+            if (-not $gsCmd) {
+                $gsCmd = Get-Command "gs" -ErrorAction SilentlyContinue
+            }
+            
+            if (-not $gsCmd) {
+                Write-Host "Warning: Ghostscript not found. ImageMagick requires Ghostscript for PDF conversion."
+                Write-Host "Please install Ghostscript from: https://www.ghostscript.com/download/gsdnld.html"
+                Write-Host "Or install via Chocolatey: choco install ghostscript"
+                Write-Host ""
+                Write-Host "Attempting conversion anyway..."
+            }            if ($EXPORT_PNG) {
                 Write-Host "Converting to PNG..."
-                $convertArgs = @("-density", "300", $PDF_FILE, "-quality", "90", $PNG_FILE)
-                & $convertCmd.Source $convertArgs
+                try {
+                    if ($magickCmd) {
+                        # Use modern ImageMagick syntax matching Linux script
+                        & magick -density 600 "$PDF_FILE" -quality 90 "$PNG_FILE" 2>&1 | Write-Host
+                    } else {
+                        # Use legacy convert command matching Linux script
+                        & convert -density 600 "$PDF_FILE" -quality 90 "$PNG_FILE" 2>&1 | Write-Host
+                    }
+                } catch {
+                    Write-Host "Error during PNG conversion: $($_.Exception.Message)"
+                    $LASTEXITCODE = 1
+                }
                 
                 if ($LASTEXITCODE -eq 0) {
                     if ($TEMP_DIR_ABS -ne $FINAL_OUTPUT_DIR_ABS) {
@@ -154,16 +238,25 @@ if ($LASTEXITCODE -eq 0) {
                     } else {
                         $OUTPUT_FILE = $PNG_FILE
                     }
-                    $FORMAT = "PNG"
-                } else {
+                    $FORMAT = "PNG"                } else {
                     Write-Host "Error during PNG conversion!"
                     if (Test-Path $PDF_FILE) { Remove-Item $PDF_FILE -Force }
                     exit 1
                 }
-            } else {
+            } elseif ($EXPORT_JPEG) {
                 Write-Host "Converting to JPEG..."
-                $convertArgs = @("-density", "300", $PDF_FILE, "-background", "white", "-flatten", "-quality", "90", $JPEG_FILE)
-                & $convertCmd.Source $convertArgs
+                try {
+                    if ($magickCmd) {
+                        # Use modern ImageMagick syntax for Windows
+                        & magick -density 600 "$PDF_FILE" -background white -flatten -quality 90 "$JPEG_FILE" 2>&1 | Write-Host
+                    } else {
+                        # Use legacy convert command
+                        & convert -density 600 "$PDF_FILE" -background white -flatten -quality 90 "$JPEG_FILE" 2>&1 | Write-Host
+                    }
+                } catch {
+                    Write-Host "Error during JPEG conversion: $($_.Exception.Message)"
+                    $LASTEXITCODE = 1
+                }
                 
                 if ($LASTEXITCODE -eq 0) {
                     if ($TEMP_DIR_ABS -ne $FINAL_OUTPUT_DIR_ABS) {
@@ -192,11 +285,14 @@ if ($LASTEXITCODE -eq 0) {
             } catch {
                 Write-Host "Generated file: $OUTPUT_FILE"
                 Write-Host "Could not open file automatically. Please open manually."
-            }
-        } else {
-            Write-Host "ImageMagick not found. Required for image conversion."
+            }        } else {
+            Write-Host "ImageMagick (convert) not installed. Required for image conversion:"
             Write-Host "Please install ImageMagick from: https://imagemagick.org/script/download.php#windows"
             Write-Host "Or install via Chocolatey: choco install imagemagick"
+            Write-Host ""
+            Write-Host "Note: ImageMagick also requires Ghostscript for PDF conversion."
+            Write-Host "Install Ghostscript from: https://www.ghostscript.com/download/gsdnld.html"
+            Write-Host "Or install via Chocolatey: choco install ghostscript"
             if (Test-Path $PDF_FILE) { Remove-Item $PDF_FILE -Force }
             exit 1
         }

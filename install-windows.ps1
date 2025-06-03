@@ -1,5 +1,6 @@
 # LaTeq Windows Installation Script
 # Automatically downloads and installs LaTeq system-wide on Windows
+# Creates a PowerShell function for easy usage
 # Repository: https://github.com/MathieuMichels/LaTeq
 # Usage: powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/install-windows.ps1' -UseBasicParsing | Invoke-Expression}"
 
@@ -11,7 +12,6 @@ param(
 # Configuration
 $REPO_BASE_URL = "https://raw.githubusercontent.com/MathieuMichels/LaTeq/main"
 $SCRIPT_PS1_URL = "$REPO_BASE_URL/LaTeq.ps1"
-$SCRIPT_BAT_URL = "$REPO_BASE_URL/LaTeq.bat"
 $TEMP_DIR = "$env:TEMP\lateq-install"
 
 # Colors for output (Windows PowerShell)
@@ -56,6 +56,7 @@ function Test-Dependencies {
     
     $missingDeps = @()
     $recommendedDeps = @()
+    $warningMsgs = @()
     
     # Check for PowerShell (should always be available)
     if (-not (Get-Command "powershell" -ErrorAction SilentlyContinue)) {
@@ -68,12 +69,24 @@ function Test-Dependencies {
     }
     
     # Check for ImageMagick
-    $convertCmd = Get-Command "magick" -ErrorAction SilentlyContinue
-    if (-not $convertCmd) {
-        $convertCmd = Get-Command "convert" -ErrorAction SilentlyContinue
-    }
-    if (-not $convertCmd) {
+    $magickCmd = Get-Command "magick" -ErrorAction SilentlyContinue
+    $convertCmd = Get-Command "convert" -ErrorAction SilentlyContinue
+    
+    if (-not $magickCmd -and -not $convertCmd) {
         $recommendedDeps += "ImageMagick (for PNG/JPEG conversion)"
+    } else {
+        # Check for Ghostscript (required for ImageMagick PDF conversion)
+        $gsCmd = Get-Command "gswin64c" -ErrorAction SilentlyContinue
+        if (-not $gsCmd) {
+            $gsCmd = Get-Command "gswin32c" -ErrorAction SilentlyContinue
+        }
+        if (-not $gsCmd) {
+            $gsCmd = Get-Command "gs" -ErrorAction SilentlyContinue
+        }
+        
+        if (-not $gsCmd) {
+            $warningMsgs += "Ghostscript not found - PNG/JPEG conversion may fail"
+        }
     }
     
     if ($missingDeps.Count -gt 0) {
@@ -81,14 +94,20 @@ function Test-Dependencies {
         exit 1
     }
     
-    if ($recommendedDeps.Count -gt 0) {
-        Write-ColorOutput "Missing recommended dependencies: $($recommendedDeps -join ', ')" "WARNING"
-        Write-ColorOutput "" 
+    if ($recommendedDeps.Count -gt 0 -or $warningMsgs.Count -gt 0) {
+        if ($recommendedDeps.Count -gt 0) {
+            Write-ColorOutput "Missing recommended dependencies: $($recommendedDeps -join ', ')" "WARNING"
+        }
+        if ($warningMsgs.Count -gt 0) {
+            Write-ColorOutput "Warnings: $($warningMsgs -join ', ')" "WARNING"
+        }
+        Write-ColorOutput ""
         Write-ColorOutput "LaTeq will be installed, but you should install these for full functionality:" "INFO"
         Write-ColorOutput "  - MiKTeX: https://miktex.org/download" "INFO"
         Write-ColorOutput "  - TeX Live: https://www.tug.org/texlive/windows.html" "INFO"
         Write-ColorOutput "  - ImageMagick: https://imagemagick.org/script/download.php#windows" "INFO"
-        Write-ColorOutput "  - Or use Chocolatey: choco install miktex imagemagick" "INFO"
+        Write-ColorOutput "  - Ghostscript: https://www.ghostscript.com/download/gsdnld.html" "INFO"
+        Write-ColorOutput "  - Or use Chocolatey: choco install miktex imagemagick ghostscript" "INFO"
         Write-ColorOutput ""
         
         $continue = Read-Host "Continue installation anyway? (y/N)"
@@ -108,17 +127,12 @@ function Get-LaTeqScripts {
         Remove-Item $TEMP_DIR -Recurse -Force
     }
     New-Item -ItemType Directory -Path $TEMP_DIR -Force | Out-Null
-    
-    Write-ColorOutput "Downloading LaTeq scripts from GitHub..." "INFO"
+      Write-ColorOutput "Downloading LaTeq scripts from GitHub..." "INFO"
     
     try {
         # Download PowerShell script
         Write-ColorOutput "Downloading LaTeq.ps1..." "INFO"
         Invoke-WebRequest -Uri $SCRIPT_PS1_URL -OutFile "$TEMP_DIR\LaTeq.ps1" -UseBasicParsing
-        
-        # Download batch wrapper
-        Write-ColorOutput "Downloading LaTeq.bat..." "INFO"
-        Invoke-WebRequest -Uri $SCRIPT_BAT_URL -OutFile "$TEMP_DIR\LaTeq.bat" -UseBasicParsing
         
     } catch {
         Write-ColorOutput "Failed to download LaTeq scripts: $($_.Exception.Message)" "ERROR"
@@ -126,7 +140,7 @@ function Get-LaTeqScripts {
     }
     
     # Verify downloads
-    if (-not (Test-Path "$TEMP_DIR\LaTeq.ps1") -or -not (Test-Path "$TEMP_DIR\LaTeq.bat")) {
+    if (-not (Test-Path "$TEMP_DIR\LaTeq.ps1")) {
         Write-ColorOutput "Failed to download LaTeq scripts." "ERROR"
         exit 1
     }
@@ -149,11 +163,9 @@ function Install-LaTeqScripts {
     if (-not (Test-Path $InstallPath)) {
         New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
     }
-    
-    try {
+      try {
         # Copy scripts to installation directory
         Copy-Item "$TEMP_DIR\LaTeq.ps1" "$InstallPath\LaTeq.ps1" -Force
-        Copy-Item "$TEMP_DIR\LaTeq.bat" "$InstallPath\LaTeq.bat" -Force
         
         Write-ColorOutput "Scripts copied to $InstallPath" "SUCCESS"
         
@@ -208,17 +220,82 @@ function Set-ExecutionPolicyIfNeeded {
     }
 }
 
+# Create PowerShell profile function for easier LaTeq usage
+function Add-LaTeqToProfile {
+    Write-ColorOutput "Adding LaTeq function to PowerShell profile..." "INFO"
+    
+    # Get PowerShell profile path
+    $profilePath = $PROFILE
+    
+    # Create profile directory if it doesn't exist
+    if (-not (Test-Path (Split-Path $profilePath))) {
+        New-Item -ItemType Directory -Path (Split-Path $profilePath) -Force | Out-Null
+    }
+    
+    # Define the LaTeq function
+    $laTeqFunction = @"
+
+# LaTeq function for easy equation compilation
+function LaTeq {
+    param(
+        [Parameter(Mandatory=`$true, Position=0)]
+        [string]`$Equation,
+        [switch]`$png,
+        [switch]`$jpeg,
+        [string]`$output,
+        [string]`$filename,
+        [string]`$packages
+    )
+    
+    `$laTeqScript = "$InstallPath\LaTeq.ps1"
+    if (-not (Test-Path `$laTeqScript)) {
+        Write-Host "Error: LaTeq.ps1 not found at `$laTeqScript"
+        return
+    }
+    
+    `$args = @(`$Equation)
+    if (`$png) { `$args += "--png" }
+    if (`$jpeg) { `$args += "--jpeg" }
+    if (`$output) { `$args += "--output"; `$args += `$output }
+    if (`$filename) { `$args += "--filename"; `$args += `$filename }
+    if (`$packages) { `$args += "--packages"; `$args += `$packages }
+    
+    & powershell.exe -ExecutionPolicy Bypass -File `$laTeqScript @args
+}
+"@
+    
+    try {
+        # Check if LaTeq function already exists in profile
+        if (Test-Path $profilePath) {
+            $profileContent = Get-Content $profilePath -Raw
+            if ($profileContent -and $profileContent.Contains("function LaTeq")) {
+                Write-ColorOutput "LaTeq function already exists in PowerShell profile." "INFO"
+                return
+            }
+        }
+        
+        # Add function to profile
+        Add-Content -Path $profilePath -Value $laTeqFunction
+        Write-ColorOutput "LaTeq function added to PowerShell profile." "SUCCESS"
+        Write-ColorOutput "You can now use 'LaTeq `"equation`"' directly in PowerShell!" "SUCCESS"
+        Write-ColorOutput "Note: Restart PowerShell or run '. `$PROFILE' to load the function." "INFO"
+        
+    } catch {
+        Write-ColorOutput "Failed to add LaTeq function to profile: $($_.Exception.Message)" "WARNING"
+        Write-ColorOutput "You can manually add the function or use the full path to LaTeq.ps1" "WARNING"
+    }
+}
+
 # Test installation
 function Test-Installation {
     Write-ColorOutput "Testing LaTeq installation..." "INFO"
     
     # Refresh PATH in current session
     $env:Path = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine) + ";" + [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
-    
-    # Test if LaTeq command is available
-    $laTeqPath = "$InstallPath\LaTeq.bat"
+      # Test if LaTeq command is available
+    $laTeqPath = "$InstallPath\LaTeq.ps1"
     if (Test-Path $laTeqPath) {
-        Write-ColorOutput "LaTeq.bat found at $laTeqPath" "SUCCESS"
+        Write-ColorOutput "LaTeq.ps1 found at $laTeqPath" "SUCCESS"
         
         # Test with a simple equation
         Write-ColorOutput "Testing with a simple equation..." "INFO"
@@ -232,7 +309,7 @@ function Test-Installation {
         Push-Location $testDir
         try {
             # Test LaTeq (will show error menu if pdflatex not available, which is expected)
-            $result = & $laTeqPath "x^2 + 1" 2>&1
+            powershell.exe -ExecutionPolicy Bypass -File $laTeqPath "x^2 + 1" 2>&1 | Out-Null
             Write-ColorOutput "LaTeq test executed (check above for any dependency warnings)." "SUCCESS"
         } catch {
             Write-ColorOutput "LaTeq test encountered issues, but installation appears correct." "WARNING"
@@ -243,7 +320,7 @@ function Test-Installation {
         }
         
     } else {
-        Write-ColorOutput "LaTeq.bat not found after installation." "ERROR"
+        Write-ColorOutput "LaTeq.ps1 not found after installation." "ERROR"
         exit 1
     }
 }
@@ -266,25 +343,25 @@ function Main {
     Write-ColorOutput "Starting LaTeq installation..." "INFO"
     Write-Host ""
     
-    try {
-        # Run installation steps
+    try {        # Run installation steps
         Assert-Administrator
         Test-Dependencies
         Get-LaTeqScripts
         Install-LaTeqScripts
         Add-ToSystemPath
         Set-ExecutionPolicyIfNeeded
-        Test-Installation
-        
-        Write-Host ""
+        Add-LaTeqToProfile
+        Test-Installation        Write-Host ""
         Write-ColorOutput "LaTeq installation completed successfully!" "SUCCESS"
         Write-Host ""
         Write-Host "Usage examples:"
-        Write-Host "  LaTeq `"x^2 + 1`"                      # Generate PDF"
-        Write-Host "  LaTeq `"E = mc^2`" -jpeg               # Generate JPEG"
-        Write-Host "  LaTeq `"\int_0^1 x dx`" -png           # Generate PNG"
+        Write-Host "  LaTeq `"x^2 + 1`"                                    # Generate PDF (after profile reload)"
+        Write-Host "  LaTeq `"E = mc^2`" -jpeg                             # Generate JPEG (after profile reload)"
+        Write-Host "  powershell LaTeq.ps1 `"x^2 + 1`"                    # Direct usage"
+        Write-Host "  powershell LaTeq.ps1 `"E = mc^2`" --jpeg             # Direct usage with JPEG"
         Write-Host ""
-        Write-ColorOutput "Note: You may need to restart your command prompt/PowerShell for PATH changes to take effect." "INFO"
+        Write-ColorOutput "To use the simplified 'LaTeq' command, restart PowerShell or run: . `$PROFILE" "INFO"
+        Write-ColorOutput "LaTeq.ps1 is located at: $InstallPath\LaTeq.ps1" "INFO"
         Write-Host ""
         Write-Host "For more information, visit: https://github.com/MathieuMichels/LaTeq"
         Write-Host ""
