@@ -142,11 +142,11 @@ download_script() {
     
     print_status "Downloading LaTeq script from GitHub..."
     
-    # Try curl first, then wget
+    # Try curl first, then wget, without cache
     if command -v curl >/dev/null 2>&1; then
-        curl -sSL "$REPO_URL" -o LaTeq.sh
+        curl -sSL "$REPO_URL" -o LaTeq.sh -H 'Cache-Control: no-cache, no-store'
     elif command -v wget >/dev/null 2>&1; then
-        wget -q "$REPO_URL" -O LaTeq.sh
+        wget -q "$REPO_URL" -O LaTeq.sh --no-cache
     else
         print_error "Neither curl nor wget found. Cannot download script."
         exit 1
