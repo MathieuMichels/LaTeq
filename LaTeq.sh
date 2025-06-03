@@ -1,24 +1,27 @@
 #!/bin/bash
 
 # Script to compile a LaTeX equation to standalone PDF, PNG, or JPEG
-# Usage: LaTeq "equation" [--png|--jpeg] [--output /path/to/dir] [--filename name] [--packages "pkg1,pkg2,pkg3"]
+# Usage: LaTeq "equation" [--png|--jpeg] [--output /path/to/dir] [--filename name] [--packages "pkg1,pkg2,pkg3"] [--dpi value]
 # Example: LaTeq "3x+1"
 # Example: LaTeq "3x+1" --png
 # Example: LaTeq "3x+1" --jpeg --output ~/Documents
 # Example: LaTeq "3x+1" --png --output ~/Documents --filename "my_equation"
+# Example: LaTeq "3x+1" --png --dpi 300
 # Example: LaTeq "\tikz \draw (0,0) circle (1cm);" --packages "tikz"
-# Example: LaTeq "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor"
+# Example: LaTeq "\chemfig{H-C(-[2]H)(-[6]H}-H}" --packages "chemfig,xcolor"
 
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 \"equation\" [--png|--jpeg] [--output /path/to/dir] [--filename name] [--packages \"pkg1,pkg2,pkg3\"]"
+    echo "Usage: $0 \"equation\" [--png|--jpeg] [--output /path/to/dir] [--filename name] [--packages \"pkg1,pkg2,pkg3\"] [--dpi value]"
     echo "Example: $0 \"3x+1\""
     echo "Example: $0 \"3x+1\" --png"
     echo "Example: $0 \"3x+1\" --jpeg --output ~/Documents"
     echo "Example: $0 \"3x+1\" --png --output ~/Documents --filename \"my_equation\""
+    echo "Example: $0 \"3x+1\" --png --dpi 300"
     echo "Example: $0 \"\\tikz \\draw (0,0) circle (1cm);\" --packages \"tikz\""
     echo "Example: $0 \"\\chemfig{H-C(-[2]H)(-[6]H)-H}\" --packages \"chemfig,xcolor\""
     echo "By default, files are saved in the current directory"
     echo "Default packages: amsmath, amssymb, amsfonts"
+    echo "Default DPI: 450"
     exit 1
 fi
 
@@ -28,6 +31,7 @@ EXPORT_JPEG=false
 OUTPUT_DIR="/tmp/LaTeq"
 CUSTOM_FILENAME=""
 PACKAGES=""
+DPI=450  # Default DPI value
 
 # Parse arguments
 shift
@@ -51,6 +55,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --packages)
             PACKAGES="$2"
+            shift 2
+            ;;
+        --dpi)
+            DPI="$2"
             shift 2
             ;;
         *)
@@ -131,6 +139,9 @@ fi
 if [ ! -z "$PACKAGES" ]; then
     echo "Using additional packages: $PACKAGES"
 fi
+if [ "$EXPORT_PNG" = true ] || [ "$EXPORT_JPEG" = true ]; then
+    echo "Using DPI: $DPI"
+fi
 
 cd "$TEMP_DIR"
 pdflatex -interaction=nonstopmode "${FILENAME}.tex" > /dev/null 2>&1
@@ -143,7 +154,7 @@ if [ $? -eq 0 ]; then
         if command -v convert > /dev/null; then
             if [ "$EXPORT_PNG" = true ]; then
                 echo "Converting to PNG..."
-                convert -density 300 "${FILENAME}.pdf" -quality 90 "${FILENAME}.png"
+                convert -density $DPI "${FILENAME}.pdf" -quality 90 "${FILENAME}.png"
                 # Copy to final output directory if different from temp
                 if [ "$TEMP_DIR_ABS" != "$FINAL_OUTPUT_DIR_ABS" ]; then
                     cp "$PNG_FILE" "$FINAL_PNG_FILE"
@@ -154,7 +165,7 @@ if [ $? -eq 0 ]; then
                 FORMAT="PNG"
             else
                 echo "Converting to JPEG..."
-                convert -density 300 "${FILENAME}.pdf" -background white -flatten -quality 90 "${FILENAME}.jpg"
+                convert -density $DPI "${FILENAME}.pdf" -background white -flatten -quality 90 "${FILENAME}.jpg"
                 # Copy to final output directory if different from temp
                 if [ "$TEMP_DIR_ABS" != "$FINAL_OUTPUT_DIR_ABS" ]; then
                     cp "$JPEG_FILE" "$FINAL_JPEG_FILE"

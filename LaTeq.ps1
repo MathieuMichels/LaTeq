@@ -1,24 +1,27 @@
 # LaTeq for Windows PowerShell
 # Script to compile a LaTeX equation to standalone PDF, PNG, or JPEG
-# Usage: LaTeq.ps1 "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"]
+# Usage: LaTeq.ps1 "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"] [--dpi "value"]
 # Example: .\LaTeq.ps1 "3x+1"
 # Example: .\LaTeq.ps1 "3x+1" --png
 # Example: .\LaTeq.ps1 "3x+1" --jpeg --output "$env:USERPROFILE\Documents"
 # Example: .\LaTeq.ps1 "3x+1" --png --output "$env:USERPROFILE\Documents" --filename "my_equation"
+# Example: .\LaTeq.ps1 "3x+1" --png --dpi "300"
 # Example: .\LaTeq.ps1 "\tikz \draw (0,0) circle (1cm);" --packages "tikz"
 # Example: .\LaTeq.ps1 "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor"
 
 # Manual argument parsing to support --parameter syntax like bash version
 if ($args.Count -eq 0) {
-    Write-Host "Usage: LaTeq.ps1 `"equation`" [--png|--jpeg] [--output `"path`"] [--filename `"name`"] [--packages `"pkg1,pkg2,pkg3`"]"
+    Write-Host "Usage: LaTeq.ps1 `"equation`" [--png|--jpeg] [--output `"path`"] [--filename `"name`"] [--packages `"pkg1,pkg2,pkg3`"] [--dpi `"value`"]"
     Write-Host "Example: .\LaTeq.ps1 `"3x+1`""
     Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png"
     Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --jpeg --output `"`$env:USERPROFILE\Documents`""
     Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png --output `"`$env:USERPROFILE\Documents`" --filename `"my_equation`""
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png --dpi `"300`""
     Write-Host "Example: .\LaTeq.ps1 `"\tikz \draw (0,0) circle (1cm);`" --packages `"tikz`""
     Write-Host "Example: .\LaTeq.ps1 `"\chemfig{H-C(-[2]H)(-[6]H)-H}`" --packages `"chemfig,xcolor`""
     Write-Host "By default, files are saved in the current directory"
     Write-Host "Default packages: amsmath, amssymb, amsfonts"
+    Write-Host "Default DPI: 450"
     exit 1
 }
 
@@ -29,6 +32,7 @@ $EXPORT_JPEG = $false
 $output = "$env:TEMP\LaTeq"  # Default to temp/LaTeq directory
 $filename = ""
 $packages = ""
+$dpi = 450  # Default DPI value
 
 # Parse arguments manually
 $i = 1
@@ -59,13 +63,21 @@ while ($i -lt $args.Count) {
                 Write-Host "Error: --filename requires a name argument"
                 exit 1
             }
-        }
-        "--packages" {
+        }        "--packages" {
             if ($i + 1 -lt $args.Count) {
                 $packages = $args[$i + 1]
                 $i += 2
             } else {
                 Write-Host "Error: --packages requires a package list argument"
+                exit 1
+            }
+        }
+        "--dpi" {
+            if ($i + 1 -lt $args.Count) {
+                $dpi = [int]$args[$i + 1]
+                $i += 2
+            } else {
+                Write-Host "Error: --dpi requires a numeric value argument"
                 exit 1
             }
         }
@@ -78,15 +90,17 @@ while ($i -lt $args.Count) {
 
 # Show usage if no equation provided
 if (-not $Equation) {
-    Write-Host "Usage: LaTeq.ps1 `"equation`" [-png] [-jpeg] [-output `"path`"] [-filename `"name`"] [-packages `"pkg1,pkg2,pkg3`"]"
+    Write-Host "Usage: LaTeq.ps1 `"equation`" [--png|--jpeg] [--output `"path`"] [--filename `"name`"] [--packages `"pkg1,pkg2,pkg3`"] [--dpi `"value`"]"
     Write-Host "Example: .\LaTeq.ps1 `"3x+1`""
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" -png"
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" -jpeg -output `"`$env:USERPROFILE\Documents`""
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" -png -output `"`$env:USERPROFILE\Documents`" -filename `"my_equation`""
-    Write-Host "Example: .\LaTeq.ps1 `"\tikz \draw (0,0) circle (1cm);`" -packages `"tikz`""
-    Write-Host "Example: .\LaTeq.ps1 `"\chemfig{H-C(-[2]H)(-[6]H)-H}`" -packages `"chemfig,xcolor`""
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png"
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --jpeg --output `"`$env:USERPROFILE\Documents`""
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png --output `"`$env:USERPROFILE\Documents`" --filename `"my_equation`""
+    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png --dpi `"300`""
+    Write-Host "Example: .\LaTeq.ps1 `"\tikz \draw (0,0) circle (1cm);`" --packages `"tikz`""
+    Write-Host "Example: .\LaTeq.ps1 `"\chemfig{H-C(-[2]H)(-[6]H)-H}`" --packages `"chemfig,xcolor`""
     Write-Host "By default, files are saved in the current directory"
     Write-Host "Default packages: amsmath, amssymb, amsfonts"
+    Write-Host "Default DPI: 450"
     exit 1
 }
 
@@ -173,6 +187,9 @@ if ($FINAL_OUTPUT_DIR_ABS -ne (Get-Location).Path) {
 if ($packages -ne "") {
     Write-Host "Using additional packages: $packages"
 }
+if ($EXPORT_PNG -or $EXPORT_JPEG) {
+    Write-Host "Using DPI: $dpi"
+}
 
 # Change to temp directory and compile
 Push-Location $TEMP_DIR
@@ -221,10 +238,10 @@ if ($LASTEXITCODE -eq 0) {
                 try {
                     if ($magickCmd) {
                         # Use modern ImageMagick syntax matching Linux script
-                        & magick -density 600 "$PDF_FILE" -quality 90 "$PNG_FILE" 2>&1 | Write-Host
+                        & magick -density $dpi "$PDF_FILE" -quality 90 "$PNG_FILE" 2>&1 | Write-Host
                     } else {
                         # Use legacy convert command matching Linux script
-                        & convert -density 600 "$PDF_FILE" -quality 90 "$PNG_FILE" 2>&1 | Write-Host
+                        & convert -density $dpi "$PDF_FILE" -quality 90 "$PNG_FILE" 2>&1 | Write-Host
                     }
                 } catch {
                     Write-Host "Error during PNG conversion: $($_.Exception.Message)"
@@ -242,16 +259,15 @@ if ($LASTEXITCODE -eq 0) {
                     Write-Host "Error during PNG conversion!"
                     if (Test-Path $PDF_FILE) { Remove-Item $PDF_FILE -Force }
                     exit 1
-                }
-            } elseif ($EXPORT_JPEG) {
+                }            } elseif ($EXPORT_JPEG) {
                 Write-Host "Converting to JPEG..."
                 try {
                     if ($magickCmd) {
                         # Use modern ImageMagick syntax for Windows
-                        & magick -density 600 "$PDF_FILE" -background white -flatten -quality 90 "$JPEG_FILE" 2>&1 | Write-Host
+                        & magick -density $dpi "$PDF_FILE" -background white -flatten -quality 90 "$JPEG_FILE" 2>&1 | Write-Host
                     } else {
                         # Use legacy convert command
-                        & convert -density 600 "$PDF_FILE" -background white -flatten -quality 90 "$JPEG_FILE" 2>&1 | Write-Host
+                        & convert -density $dpi "$PDF_FILE" -background white -flatten -quality 90 "$JPEG_FILE" 2>&1 | Write-Host
                     }
                 } catch {
                     Write-Host "Error during JPEG conversion: $($_.Exception.Message)"
