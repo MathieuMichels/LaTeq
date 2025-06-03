@@ -73,6 +73,9 @@ LaTeq "\hbar \omega = E" --packages "physics,siunitx"
 
 # Custom fonts
 LaTeq "E = mc^2" --packages "newtxtext,newtxmath" --png
+
+# More complex
+LaTeq "\boxed{\underbrace{\rho\bigl(\tfrac{\partial\mathbf{u}}{\partial t}+(\mathbf{u}\cdot\nabla)\mathbf{u}\bigr)}_{\color{red}\text{Inertia}}\;=\; -\underbrace{\nabla p}_{\color{blue}\text{Pressure}}\;+\;\underbrace{\mu\,\nabla^2\mathbf{u}}_{\color{green}\text{Viscous}}\;+\;\underbrace{\mathbf{f}}_{\color{orange}\text{Body Force}}}" --packages "amsmath,mathtools,xcolor"
 ```
 
 By default, files are saved in `/tmp/LaTeq`.
