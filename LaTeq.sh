@@ -1,17 +1,22 @@
 #!/bin/bash
 
 # Script to compile a LaTeX equation to standalone PDF, PNG, or JPEG
-# Usage: LaTeq "equation" [--png|--jpeg] [--output /path/to/dir]
+# Usage: LaTeq "equation" [--png|--jpeg] [--output /path/to/dir] [--packages "pkg1,pkg2,pkg3"]
 # Example: LaTeq "3x+1"
 # Example: LaTeq "3x+1" --png
 # Example: LaTeq "3x+1" --jpeg --output ~/Documents
+# Example: LaTeq "\tikz \draw (0,0) circle (1cm);" --packages "tikz"
+# Example: LaTeq "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor"
 
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 \"equation\" [--png|--jpeg] [--output /path/to/dir]"
+    echo "Usage: $0 \"equation\" [--png|--jpeg] [--output /path/to/dir] [--packages \"pkg1,pkg2,pkg3\"]"
     echo "Example: $0 \"3x+1\""
     echo "Example: $0 \"3x+1\" --png"
     echo "Example: $0 \"3x+1\" --jpeg --output ~/Documents"
+    echo "Example: $0 \"\\tikz \\draw (0,0) circle (1cm);\" --packages \"tikz\""
+    echo "Example: $0 \"\\chemfig{H-C(-[2]H)(-[6]H)-H}\" --packages \"chemfig,xcolor\""
     echo "By default, files are saved in /tmp/LaTeq/"
+    echo "Default packages: amsmath, amssymb, amsfonts"
     exit 1
 fi
 
@@ -19,6 +24,7 @@ EQUATION="$1"
 EXPORT_PNG=false
 EXPORT_JPEG=false
 OUTPUT_DIR="/tmp/LaTeq"
+PACKAGES=""
 
 # Parse arguments
 shift
@@ -34,6 +40,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --output)
             OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        --packages)
+            PACKAGES="$2"
             shift 2
             ;;
         *)
@@ -56,11 +66,30 @@ PDF_FILE="${OUTPUT_DIR}/${FILENAME}.pdf"
 PNG_FILE="${OUTPUT_DIR}/${FILENAME}.png"
 JPEG_FILE="${OUTPUT_DIR}/${FILENAME}.jpg"
 
+# Start building the LaTeX document
 cat > "$TEX_FILE" << EOF
 \documentclass[border=10pt]{standalone}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
+EOF
+
+# Add custom packages if specified
+if [ ! -z "$PACKAGES" ]; then
+    echo "Additional packages: $PACKAGES"
+    # Split packages by comma and add each one
+    IFS=',' read -ra PKG_ARRAY <<< "$PACKAGES"
+    for pkg in "${PKG_ARRAY[@]}"; do
+        # Trim whitespace
+        pkg=$(echo "$pkg" | xargs)
+        if [ ! -z "$pkg" ]; then
+            echo "\\usepackage{$pkg}" >> "$TEX_FILE"
+        fi
+    done
+fi
+
+# Complete the LaTeX document
+cat >> "$TEX_FILE" << EOF
 
 \begin{document}
 \$\displaystyle $EQUATION\$
@@ -69,6 +98,9 @@ EOF
 
 echo "Compiling equation: $EQUATION"
 echo "Output directory: $OUTPUT_DIR"
+if [ ! -z "$PACKAGES" ]; then
+    echo "Using additional packages: $PACKAGES"
+fi
 
 cd "$OUTPUT_DIR"
 pdflatex -interaction=nonstopmode "${FILENAME}.tex" > /dev/null 2>&1
@@ -130,7 +162,99 @@ if [ $? -eq 0 ]; then
     fi
 else
     echo "Compilation error!"
-    echo "Check your equation syntax."
-    rm -f "$TEX_FILE"
+    echo "Check your equation syntax and package dependencies."
+    echo ""
+    
+    # Interactive error handling
+    while true; do
+        echo "What would you like to do?"
+        echo "1) Show LaTeX log"
+        echo "2) Show generated .tex file"
+        echo "3) Save log file to disk"
+        echo "4) Save .tex file to disk"
+        echo "5) Show both log and .tex file"
+        echo "6) Clean up and exit"
+        echo ""
+        read -p "Choose an option (1-6): " choice
+        
+        case $choice in
+            1)
+                echo ""
+                echo "LaTeX log:"
+                echo "===================="
+                if [ -f "${OUTPUT_DIR}/${FILENAME}.log" ]; then
+                    cat "${OUTPUT_DIR}/${FILENAME}.log"
+                else
+                    echo "Log file not found"
+                fi
+                echo "===================="
+                echo ""
+                ;;
+            2)
+                echo ""
+                echo "Generated .tex file:"
+                echo "===================="
+                if [ -f "$TEX_FILE" ]; then
+                    cat "$TEX_FILE"
+                else
+                    echo "TeX file not found"
+                fi
+                echo "===================="
+                echo ""
+                ;;
+            3)
+                if [ -f "${OUTPUT_DIR}/${FILENAME}.log" ]; then
+                    SAVED_LOG="${OUTPUT_DIR}/lateq_error_$(date +%s).log"
+                    cp "${OUTPUT_DIR}/${FILENAME}.log" "$SAVED_LOG"
+                    echo "Log saved to: $SAVED_LOG"
+                else
+                    echo "No log file to save"
+                fi
+                echo ""
+                ;;
+            4)
+                if [ -f "$TEX_FILE" ]; then
+                    SAVED_TEX="${OUTPUT_DIR}/lateq_error_$(date +%s).tex"
+                    cp "$TEX_FILE" "$SAVED_TEX"
+                    echo "TeX file saved to: $SAVED_TEX"
+                else
+                    echo "No TeX file to save"
+                fi
+                echo ""
+                ;;
+            5)
+                echo ""
+                echo "Generated .tex file:"
+                echo "===================="
+                if [ -f "$TEX_FILE" ]; then
+                    cat "$TEX_FILE"
+                else
+                    echo "TeX file not found"
+                fi
+                echo "===================="
+                echo ""
+                echo "LaTeX log:"
+                echo "===================="
+                if [ -f "${OUTPUT_DIR}/${FILENAME}.log" ]; then
+                    cat "${OUTPUT_DIR}/${FILENAME}.log"
+                else
+                    echo "Log file not found"
+                fi
+                echo "===================="
+                echo ""
+                ;;
+            6)
+                echo "Cleaning up and exiting..."
+                break
+                ;;
+            *)
+                echo "Invalid option. Please choose 1-6."
+                echo ""
+                ;;
+        esac
+    done
+    
+    # Clean up temporary files
+    rm -f "$TEX_FILE" "${OUTPUT_DIR}/${FILENAME}.log" "${OUTPUT_DIR}/${FILENAME}.aux"
     exit 1
 fi
