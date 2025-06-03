@@ -55,7 +55,7 @@ This script will:
 Install LaTeq system-wide with a single PowerShell command (run as Administrator):
 
 ```powershell
-powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/install-windows.ps1' -UseBasicParsing | Invoke-Expression}"
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/install.ps1' -UseBasicParsing | Invoke-Expression}"
 ```
 
 This script will:
@@ -393,7 +393,7 @@ To completely remove LaTeq from your Windows system (but keep dependencies like 
 
 **Automatic uninstallation (recommended):**
 ```powershell
-powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}"
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.ps1' -UseBasicParsing | Invoke-Expression}"
 ```
 
 This script will:
@@ -407,10 +407,10 @@ This script will:
 **Available options:**
 ```powershell
 # Keep the PowerShell profile function
-powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -KeepProfile
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.ps1' -UseBasicParsing | Invoke-Expression}" -KeepProfile
 
 # Force uninstall without confirmation
-powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -Force
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.ps1' -UseBasicParsing | Invoke-Expression}" -Force
 ```
 
 **Manual uninstallation:**

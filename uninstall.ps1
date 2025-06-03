@@ -2,7 +2,7 @@
 # Completely removes LaTeq from Windows system (but not the dependencies)
 # Handles both current PowerShell-only installation and legacy LaTeq.bat installations
 # Repository: https://github.com/MathieuMichels/LaTeq
-# Usage: powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}"
+# Usage: powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.ps1' -UseBasicParsing | Invoke-Expression}"
 
 param(
     [string]$InstallPath = "$env:ProgramFiles\LaTeq",
@@ -40,7 +40,7 @@ function Assert-Administrator {
         Write-ColorOutput "Please run PowerShell as Administrator and try again." "ERROR"
         Write-ColorOutput "" 
         Write-ColorOutput "Right-click on PowerShell and select 'Run as Administrator', then run:" "INFO"
-        Write-ColorOutput "powershell -Command `"& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}`"" "INFO"
+        Write-ColorOutput "powershell -Command `"& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall.ps1' -UseBasicParsing | Invoke-Expression}`"" "INFO"
         exit 1
     }
     Write-ColorOutput "Administrator privileges confirmed." "SUCCESS"
