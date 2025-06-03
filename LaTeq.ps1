@@ -1,24 +1,24 @@
 # LaTeq for Windows PowerShell
 # Script to compile a LaTeX equation to standalone PDF, PNG, or JPEG
-# Usage: LaTeq.ps1 "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"] [--dpi "value"]
-# Example: .\LaTeq.ps1 "3x+1"
-# Example: .\LaTeq.ps1 "3x+1" --png
-# Example: .\LaTeq.ps1 "3x+1" --jpeg --output "$env:USERPROFILE\Documents"
-# Example: .\LaTeq.ps1 "3x+1" --png --output "$env:USERPROFILE\Documents" --filename "my_equation"
-# Example: .\LaTeq.ps1 "3x+1" --png --dpi "300"
-# Example: .\LaTeq.ps1 "\tikz \draw (0,0) circle (1cm);" --packages "tikz"
-# Example: .\LaTeq.ps1 "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor"
+# Usage: LaTeq "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--packages "pkg1,pkg2,pkg3"] [--dpi "value"]
+# Example: LaTeq "3x+1"
+# Example: LaTeq "3x+1" --png
+# Example: LaTeq "3x+1" --jpeg --output "$env:USERPROFILE\Documents"
+# Example: LaTeq "3x+1" --png --output "$env:USERPROFILE\Documents" --filename "my_equation"
+# Example: LaTeq "3x+1" --png --dpi "300"
+# Example: LaTeq "\tikz \draw (0,0) circle (1cm);" --packages "tikz"
+# Example: LaTeq "\chemfig{H-C(-[2]H)(-[6]H)-H}" --packages "chemfig,xcolor"
 
 # Manual argument parsing to support --parameter syntax like bash version
 if ($args.Count -eq 0) {
-    Write-Host "Usage: LaTeq.ps1 `"equation`" [--png|--jpeg] [--output `"path`"] [--filename `"name`"] [--packages `"pkg1,pkg2,pkg3`"] [--dpi `"value`"]"
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`""
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png"
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --jpeg --output `"`$env:USERPROFILE\Documents`""
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png --output `"`$env:USERPROFILE\Documents`" --filename `"my_equation`""
-    Write-Host "Example: .\LaTeq.ps1 `"3x+1`" --png --dpi `"300`""
-    Write-Host "Example: .\LaTeq.ps1 `"\tikz \draw (0,0) circle (1cm);`" --packages `"tikz`""
-    Write-Host "Example: .\LaTeq.ps1 `"\chemfig{H-C(-[2]H)(-[6]H)-H}`" --packages `"chemfig,xcolor`""
+    Write-Host "Usage: LaTeq `"equation`" [--png|--jpeg] [--output `"path`"] [--filename `"name`"] [--packages `"pkg1,pkg2,pkg3`"] [--dpi `"value`"]"
+    Write-Host "Example: LaTeq `"3x+1`""
+    Write-Host "Example: LaTeq `"3x+1`" --png"
+    Write-Host "Example: LaTeq `"3x+1`" --jpeg --output `"`$env:USERPROFILE\Documents`""
+    Write-Host "Example: LaTeq `"3x+1`" --png --output `"`$env:USERPROFILE\Documents`" --filename `"my_equation`""
+    Write-Host "Example: LaTeq `"3x+1`" --png --dpi `"300`""
+    Write-Host "Example: LaTeq `"\tikz \draw (0,0) circle (1cm);`" --packages `"tikz`""
+    Write-Host "Example: LaTeq `"\chemfig{H-C(-[2]H)(-[6]H)-H}`" --packages `"chemfig,xcolor`""
     Write-Host "By default, files are saved in the current directory"
     Write-Host "Default packages: amsmath, amssymb, amsfonts"
     Write-Host "Default DPI: 450"
