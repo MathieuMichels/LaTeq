@@ -172,7 +172,7 @@ LaTeq "equation" [--png|--jpeg] [--output "path"] [--filename "name"] [--package
 - `--packages "pkg1,pkg2,pkg3"` - Additional LaTeX packages to include
 - `--dpi "value"` - Resolution for image export (default: 450)
 
-By default, files are saved in the current directory.
+By default, files are saved in the temporary directory and opened automatically. You can specify a different output directory with `--output`.
 
 ### Basic Examples
 
