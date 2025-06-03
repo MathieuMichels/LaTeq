@@ -49,6 +49,34 @@ This script will:
 
 After installation, you can use `LaTeq "equation"` directly in PowerShell!
 
+## 🗑️ Uninstallation
+
+### Automatic Uninstallation (Windows)
+To completely remove LaTeq from your Windows system (but keep dependencies like MiKTeX and ImageMagick):
+
+```powershell
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}"
+```
+
+This script will:
+- ✅ Remove LaTeq installation directory (`C:\Program Files\LaTeq`)
+- ✅ Remove any legacy LaTeq.bat files from previous installations
+- ✅ Remove LaTeq paths from system PATH
+- ✅ Remove LaTeq function from PowerShell profile (optional with `--KeepProfile`)
+- ✅ Clean up temporary files
+- ✅ Keep your LaTeX dependencies (MiKTeX, ImageMagick, etc.)
+
+For manual cleanup or to keep the PowerShell profile function:
+```powershell
+# Keep the PowerShell profile function
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -KeepProfile
+
+# Force uninstall without confirmation
+powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/MathieuMichels/LaTeq/main/uninstall-windows.ps1' -UseBasicParsing | Invoke-Expression}" -Force
+```
+
+**Note:** Dependencies (MiKTeX, TeX Live, ImageMagick, Ghostscript) are not removed. Uninstall them separately if desired.
+
 ### Manual Installation
 
 #### 🐧 Linux / macOS
